@@ -1,0 +1,51 @@
+html, body {
+    min-width: 230px;
+    min-height: 100px;
+}
+body {
+    --theme-text-color: black;
+    --theme-background-color: white;
+
+    padding: 5px;
+    font-size: 14px;
+    font-family: "Arial";
+
+    color: var(--theme-text-color);
+    background-color: var(--theme-background-color);
+}
+h1 {
+    font-size: 20px;
+    padding-bottom: 5px;
+    border-bottom: solid 1px var(--theme-text-color);
+}
+.hint {
+    margin: 10px 0;
+}
+.quality-list > div {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    user-select: none;
+}
+.quality-list > div input {
+    margin: 0;
+}
+.quality-list > div label {
+    padding: 0 10px;
+}
+.chk-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 15px 0 0;
+    user-select: none;
+}
+.chk-container > input {
+    margin: 0;
+}
+@media (prefers-color-scheme: dark) {
+    body {
+        --theme-text-color: white;
+        --theme-background-color: hsl(0,0%,20%);
+    }
+}

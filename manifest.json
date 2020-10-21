@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+
+    "name": "Youtube Quality Control",
+    "description": "Automatically switch to your preferred quality in Youtube™ when available",
+    "author": "Donny",
+    "version": "0.0.1.0",
+    "icons": {
+        "64": "icon64.png"
+    },
+    "homepage_url": "http://ny-do.com",
+
+    "browser_action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://*.youtube.com/watch*", "http://*.youtube.com/watch*"],
+            "js": ["qualityctl.js"]
+        }
+    ],
+    "permissions": ["storage"]
+}
