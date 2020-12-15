@@ -19,6 +19,7 @@ function swapColumnsCtl() {
 
 let skipAd = true
 let skippedAdsCount = 0
+let skipAdsTimer = null
 function skipAdCtl() {
     // Evil Stuff
     let adSkipBtn = $(".ytp-ad-skip-button.ytp-button")
@@ -33,7 +34,25 @@ function skipAdCtl() {
         adCloseBtn.click()
         skippedAdsCount += 1
         console.log("[Donny Youtube Quality Control] Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
+    } else {
+        // Some Ads can not be skipped
+        let adPreview = $(".ytp-ad-preview-container")
+        if (skipAd && adPreview != null && skipAdsTimer == null) {
+            skippedAdsCount += 1
+            console.log("[Donny Youtube Quality Control] Doing some complex magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
+            let muteBtn = $(".ytp-mute-button")
+            muteBtn.click()
+            skipAdsTimer = setInterval(() => {
+                let adPreview = $(".ytp-ad-preview-container")
+                if (adPreview == null) {
+                    muteBtn.click()
+                    clearInterval(skipAdsTimer)
+                    skipAdsTimer = null
+                }
+            }, 100)
+        }
     }
+
 }
 
 let currentUpperLimit = 'best'
