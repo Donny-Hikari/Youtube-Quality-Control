@@ -4,6 +4,20 @@
 // Donny (c) 2020
 // 
 const $=document.querySelector.bind(document)
+const LOG_PREFIX = "[Donny Youtube Quality Control] "
+
+function hijackBubble(msg, timeout=3000) {
+    try {
+        let bezelText = $(".ytp-bezel-text-wrapper .ytp-bezel-text")
+        if (bezelText != null) {
+            bezelText.innerText = msg
+            bezelText.parentElement.parentElement.style.display = 'block'
+            setTimeout(() => {
+                bezelText.parentElement.parentElement.style.display = 'none'
+            }, timeout)
+        }
+    } catch (e) {}
+}
 
 let swapColumns = false
 function swapColumnsCtl() {
@@ -26,20 +40,20 @@ function skipAdCtl() {
     if (skipAd && adSkipBtn != null) {
         adSkipBtn.click()
         skippedAdsCount += 1
-        console.log("[Donny Youtube Quality Control] Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
+        console.log(LOG_PREFIX + "Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
     }
 
     let adCloseBtn = $(".ytp-ad-overlay-close-button")
     if (skipAd && adCloseBtn != null) {
         adCloseBtn.click()
         skippedAdsCount += 1
-        console.log("[Donny Youtube Quality Control] Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
+        console.log(LOG_PREFIX + "Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
     } else {
         // Some Ads can not be skipped
         let adPreview = $(".ytp-ad-preview-container")
         if (skipAd && adPreview != null && skipAdsTimer == null) {
             skippedAdsCount += 1
-            console.log("[Donny Youtube Quality Control] Doing some complex magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
+            console.log(LOG_PREFIX + "Doing some complex magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
             let muteBtn = $(".ytp-mute-button")
             muteBtn.click()
             skipAdsTimer = setInterval(() => {
@@ -56,22 +70,40 @@ function skipAdCtl() {
 }
 
 let currentUpperLimit = 'best'
+const maxTries = 10;
+let nTries = 0;
 function qualityCtl() {
     const upperlimit = currentUpperLimit
+
+    function retry() {
+        ++nTries
+        if (maxTries <= 0 || nTries < maxTries) {
+            setTimeout(qualityCtl, 1000)
+            return true
+        } else {
+            let info = `${LOG_PREFIX}Auto switch quality failed after ${nTries} tries.`
+            console.log(info)
+            hijackBubble(info)
+            if (skipAd) {
+                setInterval(skipAdCtl, 1000)
+            }
+            return false
+        }
+    }
 
     skipAdCtl()
 
     let settingsBtn = $(".ytp-button.ytp-settings-button")
     if (settingsBtn == null) {
-        setTimeout(qualityCtl, 1000)
+        retry()
         return
     }
     settingsBtn.click()
 
     let qualityMenu = $(".ytp-panel-menu .ytp-menuitem:last-child")
-    if (qualityMenu == null || qualityMenu.querySelector(".ytp-menuitem-label").firstChild.textContent != "Quality") {
+    if (qualityMenu == null || !["Quality", "画質"].includes(qualityMenu.querySelector(".ytp-menuitem-label").firstChild.textContent)) {
         settingsBtn.click()
-        setTimeout(qualityCtl, 1000)
+        retry()
         return
     }
     qualityMenu.click()
@@ -81,22 +113,13 @@ function qualityCtl() {
     while (qualityItem != null) {
         let label = qualityItem.querySelector("span:first-child").firstChild.textContent
         if (parseInt(label.split('p')[0]) <= upperlimit) {
-            let switchedInfo = `[Donny Youtube Quality Control] Auto switched to ${label}`
+            let switchedInfo = `${LOG_PREFIX}Auto switched to ${label}`
 
             qualityItem.click()
             console.log(switchedInfo)
             success = true
 
-            try {
-                let bezelText = $(".ytp-bezel-text-wrapper .ytp-bezel-text")
-                if (bezelText != null) {
-                    bezelText.innerText = switchedInfo
-                    bezelText.parentElement.parentElement.style.display = 'block'
-                    setTimeout(() => {
-                        bezelText.parentElement.parentElement.style.display = 'none'
-                    }, 3000)
-                }
-            } catch (e) {}
+            hijackBubble(switchedInfo)
 
             break
         }
