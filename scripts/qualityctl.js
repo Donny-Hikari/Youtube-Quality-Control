@@ -5,6 +5,7 @@
 // 
 const $=document.querySelector.bind(document)
 const LOG_PREFIX = "[Donny Youtube Quality Control] "
+const QUALITYCTRL_LABELS = ["Quality", "画質", "画质"]
 
 function hijackBubble(msg, timeout=3000) {
     try {
@@ -101,7 +102,7 @@ function qualityCtl() {
     settingsBtn.click()
 
     let qualityMenu = $(".ytp-panel-menu .ytp-menuitem:last-child")
-    if (qualityMenu == null || !["Quality", "画質"].includes(qualityMenu.querySelector(".ytp-menuitem-label").firstChild.textContent)) {
+    if (qualityMenu == null || !QUALITYCTRL_LABELS.includes(qualityMenu.querySelector(".ytp-menuitem-label").firstChild.textContent)) {
         settingsBtn.click()
         retry()
         return
