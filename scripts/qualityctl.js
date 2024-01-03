@@ -10,13 +10,15 @@ const maxTrials4Quality = 20
 
 const storage = chrome.storage.sync
 
+let previousTimeoutHandler = null
 function hijackBubble(msg, timeout=3000) {
     try {
         let bezelText = $(".ytp-bezel-text-wrapper .ytp-bezel-text")
         if (bezelText != null) {
             bezelText.innerText = msg
             bezelText.parentElement.parentElement.style.display = 'block'
-            setTimeout(() => {
+            clearTimeout(previousTimeoutHandler)
+            previousTimeoutHandler = setTimeout(() => {
                 bezelText.parentElement.parentElement.style.display = 'none'
             }, timeout)
         }
@@ -77,11 +79,26 @@ function skipAdCtl() {
 
 let notPremium = true
 let currentUpperLimit = 'best'
+let nTries = 0
 function qualityCtl() {
     const upperlimit = currentUpperLimit
 
+    function retry() {
+        ++nTries
+        if (maxTrials4Quality <= 0 || nTries < maxTrials4Quality) {
+            setTimeout(qualityCtl, 1000)
+            return true
+        } else {
+            let info = `${LOG_PREFIX}Auto switch quality failed after ${nTries} attempts.`
+            console.log(info)
+            hijackBubble(info)
+            return false
+        }
+    }
+
     let settingsBtn = $(".ytp-button.ytp-settings-button")
     if (settingsBtn == null) {
+        retry()
         return false
     }
     settingsBtn.click()
@@ -89,6 +106,7 @@ function qualityCtl() {
     let qualityMenu = $(".ytp-panel-menu .ytp-menuitem:last-child")
     if (qualityMenu == null || !QUALITYCTRL_LABELS.includes(qualityMenu.querySelector(".ytp-menuitem-label").firstChild.textContent)) {
         settingsBtn.click()
+        retry()
         return false
     }
     qualityMenu.click()
@@ -127,32 +145,13 @@ function addressChange(cb) {
     }
 }
 
-let nTries = 0
 function mainCtl() {
-    function retry() {
-        ++nTries
-        if (maxTrials4Quality <= 0 || nTries < maxTrials4Quality) {
-            setTimeout(mainCtl, 1000)
-            return true
-        } else {
-            let info = `${LOG_PREFIX}Auto switch quality failed after ${nTries} attempts.`
-            console.log(info)
-            hijackBubble(info)
-            return false
-        }
-    }
-
-    skipAdCtl()
-    if (!qualityCtl()) {
-        if (retry()) {
-            return
-        }
-    }
+    qualityCtl()
+    setInterval(() => addressChange(qualityCtl), 1000)
 
     if (skipAd) {
         setInterval(skipAdCtl, 1000)
     }
-    setInterval(() => addressChange(qualityCtl), 1000)
 }
 
 storage.get(['quality','skipAd','swapColumns'], function (d) {
