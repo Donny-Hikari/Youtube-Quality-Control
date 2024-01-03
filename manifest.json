@@ -1,23 +1,25 @@
 {
-    "manifest_version": 2,
+  "manifest_version": 3,
 
-    "name": "Youtube Quality Control",
-    "description": "Automatically switch to your preferred quality in Youtube™ when available",
-    "author": "Donny",
-    "version": "0.0.2.0",
-    "icons": {
-        "64": "icons/icon64.png"
-    },
-    "homepage_url": "http://ny-do.com",
+  "name": "Youtube Quality Control",
+  "description": "Automatically switch to your preferred quality in Youtube™ when available",
+  "author": "Donny",
+  "version": "0.0.3.0",
+  "icons": {
+    "64": "icons/icon64.png"
+  },
+  "homepage_url": "http://ny-do.com",
 
-    "browser_action": {
-        "default_popup": "pages/popup.html"
-    },
-    "content_scripts": [
-        {
-            "matches": ["https://*.youtube.com/watch*", "http://*.youtube.com/watch*"],
-            "js": ["scripts/qualityctl.js"]
-        }
-    ],
-    "permissions": ["storage"]
+  "action": {
+    "default_popup": "pages/popup.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["scripts/qualityctl.js"]
+    }
+  ],
+
+  "permissions": ["storage"]
 }

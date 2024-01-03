@@ -6,11 +6,13 @@
 
 const allPossibleQualities = ["best", "4320p", "2160p", "1440p", "1080p", "720p", "480p", "360p", "240p", "144p"]
 
+const storage = chrome.storage.sync
+
 let currentQuality = "best"
 let skipAd = true
 let swapColumns = false
 
-chrome.storage.sync.get(['quality', 'skipAd', 'swapColumns'], function (d) {
+storage.get(['quality', 'skipAd', 'swapColumns'], function (d) {
     currentQuality = d['quality'] || "best"
     skipAd = d['skipAd']
     swapColumns = d['swapColumns']
@@ -41,7 +43,7 @@ function setupQualityList() {
             item.checked = true
         }
         item.addEventListener('change', () => {
-            chrome.storage.sync.set({quality: q}, function () {
+            storage.set({quality: q}, function () {
                 console.log(`Upper limit of quality now changed to ${q}.`)
             })
         })
@@ -65,7 +67,7 @@ function setupSkipAd() {
     skipAdElem.checked = skipAd
     skipAdElem.addEventListener('change', () => {
         skipAd = skipAdElem.checked
-        chrome.storage.sync.set({skipAd: skipAd}, function () {
+        storage.set({skipAd: skipAd}, function () {
             console.log(`Skip Ad: ${(skipAd) ? "On" : "Off"}`)
         })
     })
@@ -76,7 +78,7 @@ function setupSwapColumns() {
     swapColumnsElem.checked = swapColumns
     swapColumnsElem.addEventListener('change', () => {
         swapColumns = swapColumnsElem.checked
-        chrome.storage.sync.set({swapColumns: swapColumns}, function () {
+        storage.set({swapColumns: swapColumns}, function () {
             console.log(`Swap columns: ${(swapColumns) ? "On" : "Off"}`)
         })
     })
