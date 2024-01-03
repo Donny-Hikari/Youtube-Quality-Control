@@ -75,6 +75,7 @@ function skipAdCtl() {
     }
 }
 
+let notPremium = true
 let currentUpperLimit = 'best'
 function qualityCtl() {
     const upperlimit = currentUpperLimit
@@ -96,7 +97,7 @@ function qualityCtl() {
     let success = false
     while (qualityItem != null) {
         let label = qualityItem.querySelector("span:first-child").firstChild.textContent
-        if (parseInt(label.split('p')[0]) <= upperlimit) {
+        if ((!notPremium || -1 == label.search("Premium")) && parseInt(label.split('p')[0]) <= upperlimit) {
             let switchedInfo = `${LOG_PREFIX}Auto switched to ${label}`
 
             qualityItem.click()
@@ -158,15 +159,10 @@ storage.get(['quality','skipAd','swapColumns'], function (d) {
     let currentQuality = d['quality'] || "best"
     currentUpperLimit = (currentQuality === 'best') ? Infinity : parseInt(currentQuality.split('p')[0])
 
-    skipAd = d['skipAd']
-    if (skipAd === undefined) {
-        skipAd = true
-    }
+    notPremium = d['notPremium'] ?? true
+    skipAd = d['skipAd'] ?? true
+    swapColumns = d['swapColumns'] ?? false
 
-    swapColumns = d['swapColumns']
-    if (swapColumns === undefined) {
-        swapColumns = false
-    }
     if (swapColumns) {
         setTimeout(swapColumnsCtl, 1000)
     }

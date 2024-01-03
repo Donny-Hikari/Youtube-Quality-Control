@@ -9,22 +9,18 @@ const allPossibleQualities = ["best", "4320p", "2160p", "1440p", "1080p", "720p"
 const storage = chrome.storage.sync
 
 let currentQuality = "best"
+let notPremium = true
 let skipAd = true
 let swapColumns = false
 
 storage.get(['quality', 'skipAd', 'swapColumns'], function (d) {
     currentQuality = d['quality'] || "best"
-    skipAd = d['skipAd']
-    swapColumns = d['swapColumns']
-
-    if (skipAd === undefined) {
-        skipAd = true
-    }
-    if (swapColumns === undefined) {
-        swapColumns = false
-    }
+    notPremium = d['notPremium'] ?? true
+    skipAd = d['skipAd'] ?? true
+    swapColumns = d['swapColumns'] ?? false
 
     setupQualityList()
+    setupNotPremium()
     setupSkipAd()
     setupSwapColumns()
 })
@@ -60,6 +56,17 @@ function setupQualityList() {
         itemWrapper.append(label)
         qualityList.append(itemWrapper)
     }
+}
+
+function setupNotPremium() {
+    let notPremiumElem = document.querySelector("#not-premium")
+    notPremiumElem.checked = notPremium
+    notPremiumElem.addEventListener('change', () => {
+        notPremium = notPremiumElem.checked
+        storage.set({notPremium: notPremium}, function () {
+            console.log(`Swap columns: ${(notPremium) ? "On" : "Off"}`)
+        })
+    })
 }
 
 function setupSkipAd() {
