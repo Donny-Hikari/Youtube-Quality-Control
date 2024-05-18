@@ -21,16 +21,16 @@ h1 {
 .hint {
     margin: 10px 0;
 }
-.quality-list > div {
+.item-list > div {
     display: flex;
     align-items: center;
     margin: 8px 0;
     user-select: none;
 }
-.quality-list > div input {
+.item-list > div input {
     margin: 0;
 }
-.quality-list > div label {
+.item-list > div label {
     padding: 0 10px;
 }
 .chk-container {
