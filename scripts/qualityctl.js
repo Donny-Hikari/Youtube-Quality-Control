@@ -100,6 +100,7 @@ function findSettingsMenuItem(name_candidates) {
         }
         openSettingsMenu(true) // try activating the settings menu
         settingsMenu = $(".ytp-settings-menu")
+        console.log(`${LOG_PREFIX}settings menu ${settingsMenu == null ? "is null" : "exists"}`)
         menuItems = settingsMenu?.querySelectorAll('.ytp-menuitem')
         if (settingsMenu == null) {
             if (LOG_LEVEL == 'debug') {
@@ -296,7 +297,9 @@ function speedCtl(nextHandler) {
 let currentAddress = window.location.href
 function addressChange(cb) {
     if (window.location.href != currentAddress) {
+        console.log(`${LOG_PREFIX}Address changed, trying to do magic`)
         currentAddress = window.location.href
+        nTries = 0
         cb()
     }
 }
