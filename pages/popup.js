@@ -14,19 +14,22 @@ let currentSpeed = '1.0'
 let notPremium = true
 let skipAd = true
 let swapColumns = false
+let normalSpeedShortcut = true
 
-storage.get(['quality', 'skipAd', 'swapColumns', 'notPremium', 'playbackSpeed'], function (d) {
+storage.get(['quality', 'skipAd', 'swapColumns', 'notPremium', 'playbackSpeed', 'normalSpeedShortcut'], function (d) {
     currentQuality = d['quality'] || "best"
     currentSpeed = d['playbackSpeed'] || '1.0'
     notPremium = d['notPremium'] ?? true
     skipAd = d['skipAd'] ?? true
     swapColumns = d['swapColumns'] ?? false
+    normalSpeedShortcut = d['normalSpeedShortcut'] ?? true
 
     setupQualityList()
     setupPlaybackSpeedList()
     setupNotPremium()
     setupSkipAd()
     setupSwapColumns()
+    setupNormalSpeedShortcut()
 })
 
 function setupQualityList() {
@@ -95,35 +98,29 @@ function setupPlaybackSpeedList() {
     }
 }
 
-function setupNotPremium() {
-    let notPremiumElem = document.querySelector("#not-premium")
-    notPremiumElem.checked = notPremium
-    notPremiumElem.addEventListener('change', () => {
-        notPremium = notPremiumElem.checked
-        storage.set({notPremium: notPremium}, function () {
-            console.log(`Swap columns: ${(notPremium) ? "On" : "Off"}`)
+function checkboxControl(ctrlSelector, bindVarName) {
+    let controlElem = document.querySelector(ctrlSelector)
+    controlElem.checked = global[bindVarName]
+    controlElem.addEventListener('change', () => {
+        global[bindVarName] = controlElem.checked
+        storage.set({[bindVarName]: global[bindVarName]}, function () {
+            console.log(`Swap columns: ${(global[bindVarName]) ? "On" : "Off"}`)
         })
     })
+}
+
+function setupNotPremium() {
+    checkboxControl("#not-premium", "notPremium")
 }
 
 function setupSkipAd() {
-    let skipAdElem = document.querySelector("#skip-ad")
-    skipAdElem.checked = skipAd
-    skipAdElem.addEventListener('change', () => {
-        skipAd = skipAdElem.checked
-        storage.set({skipAd: skipAd}, function () {
-            console.log(`Skip Ad: ${(skipAd) ? "On" : "Off"}`)
-        })
-    })
+    checkboxControl("#skip-ad", "skipAd")
 }
 
 function setupSwapColumns() {
-    let swapColumnsElem = document.querySelector("#swap-columns")
-    swapColumnsElem.checked = swapColumns
-    swapColumnsElem.addEventListener('change', () => {
-        swapColumns = swapColumnsElem.checked
-        storage.set({swapColumns: swapColumns}, function () {
-            console.log(`Swap columns: ${(swapColumns) ? "On" : "Off"}`)
-        })
-    })
+    checkboxControl("#swap-columns", "swapColumns")
+}
+
+function setupNormalSpeedShortcut() {
+    checkboxControl("#normal-speed-shortcut", "normalSpeedShortcut")
 }
