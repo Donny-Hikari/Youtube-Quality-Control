@@ -11,6 +11,7 @@ const MUTED_LABELS = ["ミュート解除"]
 const PLAYBACK_SPEED_LABELS = ["Playback speed", "再生速度"]
 const NORMAL_SPEED_LABELS = ["Normal", "標準"]
 const maxTrials4Quality = 100
+const adEarlySkip = 3 // seconds, <0 means no early skip
 
 const storage = chrome.storage.sync
 
@@ -129,39 +130,48 @@ let skippedAdsCount = 0
 let skipAdsTimer = null
 function skipAdCtl() {
     // Evil Stuff
-    let adSkipBtn = $(".ytp-ad-skip-button.ytp-button") || $(".ytp-ad-skip-button-modern.ytp-button") || $(".ytp-skip-ad-button")
-    if (skipAd && adSkipBtn != null) {
-        adSkipBtn.click()
-        skippedAdsCount += 1
-        console.log(LOG_PREFIX + "Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
+    // youtube now detect early skip; this is a trap!
+    function skipAdWithBtn(skipBtn) {
+        if (skipBtn != null) {
+            skipBtn.click()
+            skippedAdsCount += 1
+            console.log(LOG_PREFIX + "Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
+            return true
+        } else {
+            return false
+        }
     }
 
-    let adCloseBtn = $(".ytp-ad-overlay-close-button")
-    if (skipAd && adCloseBtn != null) {
-        adCloseBtn.click()
-        skippedAdsCount += 1
-        console.log(LOG_PREFIX + "Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
-    } else {
-        function isMuted(muteBtn) {
-            for (let label of MUTED_LABELS) {
-                if (muteBtn.dataset['titleNoTooltip'].startsWith(label)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+    function skipAdAuto() {
+        let adSkipBtn = $(".ytp-ad-skip-button.ytp-button") || $(".ytp-ad-skip-button-modern.ytp-button") || $(".ytp-skip-ad-button")
+        let adCloseBtn = $(".ytp-ad-overlay-close-button")
+        return skipAdWithBtn(adSkipBtn) || skipAdWithBtn(adCloseBtn)
+    }
 
-        // Some Ads can not be skipped
+    function isMuted(muteBtn) {
+        for (let label of MUTED_LABELS) {
+            if (muteBtn.dataset['titleNoTooltip'].startsWith(label)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function muteAdThenSkip() {
         let adPreview = $(".ytp-preview-ad")
-        if (skipAd && adPreview != null && skipAdsTimer == null) {
+        if (adPreview != null && skipAdsTimer == null) {
             skippedAdsCount += 1
             console.log(LOG_PREFIX + "Doing some complex magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
             let muteBtn = $(".ytp-mute-button")
             if (!isMuted(muteBtn)) {
                 muteBtn.click()
             }
+            let earlySkipStartTime = Date.now()
             skipAdsTimer = setInterval(() => {
                 let adPreview = $(".ytp-preview-ad")
+                if (adEarlySkip >= 0 && Date.now() >= earlySkipStartTime + adEarlySkip) {
+                    skipAdAuto()
+                }
                 if (adPreview == null || !isVisible(adPreview)) {
                     if (isMuted(muteBtn)) {
                         muteBtn.click()
@@ -172,6 +182,10 @@ function skipAdCtl() {
                 }
             }, 100)
         }
+    }
+
+    if (skipAd) {
+        muteAdThenSkip()
     }
 }
 
