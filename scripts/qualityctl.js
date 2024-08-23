@@ -256,9 +256,10 @@ function qualityCtl() {
     return success
 }
 
+function switchSpeed(speed, cb_done) {}
+
 let currentSpeed = '1.0'
 function speedCtl(nextHandler) {
-    console.trace()
     let speedMenu = findSettingsMenuItem(PLAYBACK_SPEED_LABELS)
     if (!speedMenu) {
         // settings menu does not exist
@@ -308,6 +309,16 @@ function speedCtl(nextHandler) {
     return success
 }
 
+function hookResetSpeed() {
+    document.addEventListener("keydown", (event) => {
+        if (event.key == '|') {
+            console.log(`${LOG_PREFIX}Reset playback speed`)
+            currentSpeed = '1.0'
+            speedCtl(() => {})
+        }
+    })
+}
+
 let currentAddress = window.location.href
 function addressChange(cb) {
     if (window.location.href != currentAddress) {
@@ -319,6 +330,7 @@ function addressChange(cb) {
 }
 
 function mainCtl() {
+    hookResetSpeed()
     qualityCtl()
     setInterval(() => addressChange(qualityCtl), 1000)
 

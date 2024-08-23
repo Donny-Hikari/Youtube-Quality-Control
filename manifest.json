@@ -4,7 +4,7 @@
   "name": "Youtube Quality Control",
   "description": "Automatically switch to your preferred quality in Youtube™ when available",
   "author": "Donny",
-  "version": "0.0.4.0",
+  "version": "0.0.4.2",
   "icons": {
     "64": "icons/icon64.png"
   },
