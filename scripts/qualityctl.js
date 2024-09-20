@@ -11,7 +11,7 @@ const MUTED_LABELS = ["ミュート解除"]
 const PLAYBACK_SPEED_LABELS = ["Playback speed", "再生速度"]
 const NORMAL_SPEED_LABELS = ["Normal", "標準"]
 const maxTrials4Quality = 100
-const adSkipDelay = 2 // seconds, delay to avoid Youtube adBlocker blocker
+const adSkipDelay = 6 // seconds, delay to avoid Youtube adBlocker blocker
 
 const storage = chrome.storage.sync
 
@@ -128,11 +128,12 @@ let startPlayingHandlers = []
 let skipAd = true
 let skippedAdsCount = 0
 let skipAdsTimer = null
+let isInAd = false
 function skipAdCtl() {
     // Evil Stuff
     // youtube now detect early skip; this is a trap!
     function skipAdWithBtn(skipBtn) {
-        if (skipBtn != null && isVisible(skipBtn)) {
+        if (adSkipDelay > 0 && skipBtn != null && isVisible(skipBtn)) {
             setTimeout(() => skipBtn.click(), adSkipDelay*1000)
             skippedAdsCount += 1
             console.log(LOG_PREFIX + "Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
@@ -159,6 +160,7 @@ function skipAdCtl() {
 
     function muteAdThenSkip() {
         let adPreview = $(".ytp-preview-ad")
+        isInAd = adPreview != null
         if (adPreview != null && skipAdsTimer == null) {
             skippedAdsCount += 1
             console.log(LOG_PREFIX + "Doing some complex magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
@@ -166,16 +168,17 @@ function skipAdCtl() {
             if (!isMuted(muteBtn)) {
                 muteBtn.click()
             }
+            skipAdAuto()
             skipAdsTimer = setInterval(() => {
                 let adPreview = $(".ytp-preview-ad")
-                // skipAdAuto()
                 if (adPreview == null || !isVisible(adPreview)) {
+                    isInAd = false
                     if (isMuted(muteBtn)) {
                         muteBtn.click()
                     }
                     clearInterval(skipAdsTimer)
                     skipAdsTimer = null
-                    skipAdCtl()
+                    // skipAdCtl()
                 }
             }, 100)
         }
@@ -192,8 +195,10 @@ let nTries = 0
 function qualityCtl() {
     const upperlimit = currentUpperLimit
 
-    function retry() {
-        ++nTries
+    function retry(incRetry=true) {
+        if (incRetry) {
+            ++nTries
+        }
         if (maxTrials4Quality <= 0 || nTries < maxTrials4Quality) {
             setTimeout(qualityCtl, 1000)
             return true
@@ -203,6 +208,10 @@ function qualityCtl() {
             hijackBubble(info)
             return false
         }
+    }
+
+    if (isInAd) {
+        retry(false)
     }
 
     let qualityMenu = findSettingsMenuItem(QUALITYCTRL_LABELS)
