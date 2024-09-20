@@ -11,7 +11,7 @@ const MUTED_LABELS = ["ミュート解除"]
 const PLAYBACK_SPEED_LABELS = ["Playback speed", "再生速度"]
 const NORMAL_SPEED_LABELS = ["Normal", "標準"]
 const maxTrials4Quality = 100
-const adEarlySkip = 3 // seconds, <0 means no early skip
+const adSkipDelay = 2 // seconds, delay to avoid Youtube adBlocker blocker
 
 const storage = chrome.storage.sync
 
@@ -132,8 +132,8 @@ function skipAdCtl() {
     // Evil Stuff
     // youtube now detect early skip; this is a trap!
     function skipAdWithBtn(skipBtn) {
-        if (skipBtn != null) {
-            skipBtn.click()
+        if (skipBtn != null && isVisible(skipBtn)) {
+            setTimeout(() => skipBtn.click(), adSkipDelay*1000)
             skippedAdsCount += 1
             console.log(LOG_PREFIX + "Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
             return true
@@ -166,12 +166,9 @@ function skipAdCtl() {
             if (!isMuted(muteBtn)) {
                 muteBtn.click()
             }
-            let earlySkipStartTime = Date.now()
             skipAdsTimer = setInterval(() => {
                 let adPreview = $(".ytp-preview-ad")
-                if (adEarlySkip >= 0 && Date.now() >= earlySkipStartTime + adEarlySkip) {
-                    skipAdAuto()
-                }
+                // skipAdAuto()
                 if (adPreview == null || !isVisible(adPreview)) {
                     if (isMuted(muteBtn)) {
                         muteBtn.click()

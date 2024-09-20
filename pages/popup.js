@@ -9,20 +9,22 @@ const allPossiblePlaybackSpeed = ['0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '
 
 const storage = chrome.storage.sync
 
-let currentQuality = "best"
-let currentSpeed = '1.0'
-let notPremium = true
-let skipAd = true
-let swapColumns = false
-let normalSpeedShortcut = true
+let options = {
+    'currentQuality': 'best',
+    'currentSpeed': '1.0',
+    'notPremium': true,
+    'skipAd': true,
+    'swapColumns': false,
+    'normalSpeedShortcut': true,
+}
 
 storage.get(['quality', 'skipAd', 'swapColumns', 'notPremium', 'playbackSpeed', 'normalSpeedShortcut'], function (d) {
-    currentQuality = d['quality'] || "best"
-    currentSpeed = d['playbackSpeed'] || '1.0'
-    notPremium = d['notPremium'] ?? true
-    skipAd = d['skipAd'] ?? true
-    swapColumns = d['swapColumns'] ?? false
-    normalSpeedShortcut = d['normalSpeedShortcut'] ?? true
+    options['currentQuality'] = d['quality'] || options['currentQuality']
+    options['currentSpeed'] = d['playbackSpeed'] || options['currentSpeed']
+    options['notPremium'] = d['notPremium'] ?? options['notPremium']
+    options['skipAd'] = d['skipAd'] ?? options['skipAd']
+    options['swapColumns'] = d['swapColumns'] ?? options['swapColumns']
+    options['normalSpeedShortcut'] = d['normalSpeedShortcut'] ?? options['normalSpeedShortcut']
 
     setupQualityList()
     setupPlaybackSpeedList()
@@ -42,7 +44,7 @@ function setupQualityList() {
         item.setAttribute('type', "radio")
         item.setAttribute('name', "quality")
         item.setAttribute('value', q)
-        if (q === currentQuality) {
+        if (q === options['currentQuality']) {
             item.checked = true
         }
         item.addEventListener('change', () => {
@@ -75,7 +77,7 @@ function setupPlaybackSpeedList() {
         item.setAttribute('type', "radio")
         item.setAttribute('name', "speed")
         item.setAttribute('value', q)
-        if (q === currentSpeed) {
+        if (q === options['currentSpeed']) {
             item.checked = true
         }
         item.addEventListener('change', () => {
@@ -100,11 +102,11 @@ function setupPlaybackSpeedList() {
 
 function checkboxControl(ctrlSelector, bindVarName) {
     let controlElem = document.querySelector(ctrlSelector)
-    controlElem.checked = global[bindVarName]
+    controlElem.checked = options[bindVarName]
     controlElem.addEventListener('change', () => {
-        global[bindVarName] = controlElem.checked
-        storage.set({[bindVarName]: global[bindVarName]}, function () {
-            console.log(`Swap columns: ${(global[bindVarName]) ? "On" : "Off"}`)
+        options[bindVarName] = controlElem.checked
+        storage.set({[bindVarName]: options[bindVarName]}, function () {
+            console.log(`Swap columns: ${(options[bindVarName]) ? "On" : "Off"}`)
         })
     })
 }
