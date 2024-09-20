@@ -11,7 +11,7 @@ const MUTED_LABELS = ["ミュート解除"]
 const PLAYBACK_SPEED_LABELS = ["Playback speed", "再生速度"]
 const NORMAL_SPEED_LABELS = ["Normal", "標準"]
 const maxTrials4Quality = 100
-const adSkipDelay = 6 // seconds, delay to avoid Youtube adBlocker blocker
+const adSkipDelay = -1 // seconds, delay to avoid Youtube adBlocker blocker; < 0 disable auto ad skip
 
 const storage = chrome.storage.sync
 
@@ -43,7 +43,7 @@ function swapColumnsCtl() {
 }
 
 function isVisible(e) {
-    return e.style.display != 'none';
+    return e != null && e.style.display != 'none';
 }
 
 function openSettingsMenu(open) {
@@ -130,10 +130,24 @@ let skippedAdsCount = 0
 let skipAdsTimer = null
 let isInAd = false
 function skipAdCtl() {
+    function getAdPreview() {
+        return $(".ytp-preview-ad")
+    }
+
+    function getAdSkipBtn() {
+        return $(".ytp-ad-skip-button.ytp-button") || $(".ytp-ad-skip-button-modern.ytp-button") || $(".ytp-skip-ad-button") || $(".ytp-ad-overlay-close-button")
+    }
+
+    function isAdPlaying() {
+        let adPreview = getAdPreview()
+        let adSkipBtn = getAdSkipBtn()
+        return isVisible(adPreview) || isVisible(adSkipBtn)
+    }
+
     // Evil Stuff
     // youtube now detect early skip; this is a trap!
     function skipAdWithBtn(skipBtn) {
-        if (adSkipDelay > 0 && skipBtn != null && isVisible(skipBtn)) {
+        if (adSkipDelay > 0 && isVisible(skipBtn)) {
             setTimeout(() => skipBtn.click(), adSkipDelay*1000)
             skippedAdsCount += 1
             console.log(LOG_PREFIX + "Do some magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
@@ -144,9 +158,7 @@ function skipAdCtl() {
     }
 
     function skipAdAuto() {
-        let adSkipBtn = $(".ytp-ad-skip-button.ytp-button") || $(".ytp-ad-skip-button-modern.ytp-button") || $(".ytp-skip-ad-button")
-        let adCloseBtn = $(".ytp-ad-overlay-close-button")
-        return skipAdWithBtn(adSkipBtn) || skipAdWithBtn(adCloseBtn)
+        return skipAdWithBtn(getAdSkipBtn())
     }
 
     function isMuted(muteBtn) {
@@ -159,26 +171,28 @@ function skipAdCtl() {
     }
 
     function muteAdThenSkip() {
-        let adPreview = $(".ytp-preview-ad")
-        isInAd = adPreview != null
-        if (adPreview != null && skipAdsTimer == null) {
+        isInAd = isAdPlaying()
+        if (isInAd && skipAdsTimer == null) {
             skippedAdsCount += 1
             console.log(LOG_PREFIX + "Doing some complex magic!" + (skippedAdsCount > 1 ? ` x${skippedAdsCount}` : ''))
             let muteBtn = $(".ytp-mute-button")
             if (!isMuted(muteBtn)) {
                 muteBtn.click()
             }
-            skipAdAuto()
             skipAdsTimer = setInterval(() => {
-                let adPreview = $(".ytp-preview-ad")
-                if (adPreview == null || !isVisible(adPreview)) {
-                    isInAd = false
-                    if (isMuted(muteBtn)) {
-                        muteBtn.click()
+                let adPreview = getAdPreview()
+                if (!isVisible(adPreview)) {
+                    skipAdAuto()
+                } else {
+                    isInAd = isAdPlaying()
+                    if (!isInAd) {
+                        if (isMuted(muteBtn)) {
+                            muteBtn.click()
+                        }
+                        clearInterval(skipAdsTimer)
+                        skipAdsTimer = null
+                        // skipAdCtl()
                     }
-                    clearInterval(skipAdsTimer)
-                    skipAdsTimer = null
-                    // skipAdCtl()
                 }
             }, 100)
         }
@@ -212,6 +226,7 @@ function qualityCtl() {
 
     if (isInAd) {
         retry(false)
+        return false
     }
 
     let qualityMenu = findSettingsMenuItem(QUALITYCTRL_LABELS)
