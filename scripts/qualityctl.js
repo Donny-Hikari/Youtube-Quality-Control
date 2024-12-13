@@ -11,7 +11,7 @@ const MUTED_LABELS = ["ミュート解除"]
 const PLAYBACK_SPEED_LABELS = ["Playback speed", "再生速度"]
 const NORMAL_SPEED_LABELS = ["Normal", "標準"]
 const maxTrials4Quality = 100
-const adSkipDelay = -1 // seconds, delay to avoid Youtube adBlocker blocker; < 0 disable auto ad skip
+const adSkipDelay = 1 // seconds, delay to avoid Youtube adBlocker blocker; < 0 disable auto ad skip
 
 const storage = chrome.storage.sync
 
@@ -131,7 +131,7 @@ let skipAdsTimer = null
 let isInAd = false
 function skipAdCtl() {
     function getAdPreview() {
-        return $(".ytp-preview-ad")
+        return $(".ytp-preview-ad") || $(".ytp-ad-player-overlay-layout")
     }
 
     function getAdSkipBtn() {
@@ -180,19 +180,17 @@ function skipAdCtl() {
                 muteBtn.click()
             }
             skipAdsTimer = setInterval(() => {
-                let adPreview = getAdPreview()
-                if (!isVisible(adPreview)) {
-                    skipAdAuto()
-                } else {
-                    isInAd = isAdPlaying()
-                    if (!isInAd) {
-                        if (isMuted(muteBtn)) {
-                            muteBtn.click()
-                        }
-                        clearInterval(skipAdsTimer)
-                        skipAdsTimer = null
-                        // skipAdCtl()
+                let isInAd = isAdPlaying()
+                let adSkipBtn = getAdSkipBtn()
+                if (!isInAd) {
+                    if (isMuted(muteBtn)) {
+                        muteBtn.click()
                     }
+                    clearInterval(skipAdsTimer)
+                    skipAdsTimer = null
+                    // skipAdCtl()
+                } else if (isVisible(adSkipBtn)) {
+                    skipAdAuto()
                 }
             }, 100)
         }
