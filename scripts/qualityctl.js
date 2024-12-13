@@ -329,11 +329,42 @@ function speedCtl(nextHandler) {
 }
 
 function hookResetSpeed() {
+    function getVideoPlayer() {
+        let video = document.querySelector(".video-stream") || document.querySelector("..html5-main-video") || document.querySelector("video")
+        return video
+    }
+
     document.addEventListener("keydown", (event) => {
         if (event.key == '|') {
             console.log(`${LOG_PREFIX}Reset playback speed`)
             currentSpeed = '1.0'
             speedCtl(() => {})
+        } else if (event.key == '.') {
+            let video = getVideoPlayer()
+
+            setTimeout(() => {
+                video.playbackRate += 0.25
+                hijackBubble(String(video.playbackRate) + 'x')
+                console.log(`${LOG_PREFIX}Increase playback speed to ${video.playbackRate}x`)
+            }, 5)
+
+            event.stopPropagation()
+            event.preventDefault()
+        } else if (event.key == ',') {
+            let video = getVideoPlayer()
+
+            if (video.playbackRate <= 0.25) {
+                return
+            }
+
+            setTimeout(() => {
+                video.playbackRate -= 0.25
+                hijackBubble(String(video.playbackRate) + 'x')
+                console.log(`${LOG_PREFIX}Decrease playback speed to ${video.playbackRate}x`)
+            }, 5)
+
+            event.stopPropagation()
+            event.preventDefault()
         }
     })
 }
