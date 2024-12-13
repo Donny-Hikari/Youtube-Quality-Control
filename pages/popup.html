@@ -7,7 +7,17 @@
     <div class="hint">Choose an upper limit of quality:</div>
     <div class="quality-list item-list"></div>
     <div class="hint">Choose a default playback speed:</div>
-    <div class="speed-list item-list"></div>
+    <div class="speed-list item-list">
+        <div class="custom-speed-container">
+            <div class="nested-container">
+                <input id="speed-custom" type="radio" name="speed" value="custom" />
+                <label for="speed-custom">Custom</label>
+            </div>
+            <div class="nested-container">
+                <input id="custom-speed" placeholder="3">x
+            </div>
+        </div>
+    </div>
     <div class="not-premium-container chk-container">
         <label for="not-premium">Not premium quality</label>
         <input id="not-premium" class="hint" type="checkbox">

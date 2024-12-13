@@ -43,6 +43,17 @@ h1 {
 .chk-container > input {
     margin: 0;
 }
+.custom-speed-container {
+    display: flex;
+    justify-content: space-between;
+}
+.nested-container {
+    display: flex;
+}
+#custom-speed {
+    margin: auto 5px auto 20px;
+    max-width: 60px;
+}
 @media (prefers-color-scheme: dark) {
     body {
         --theme-text-color: white;

@@ -277,6 +277,11 @@ function qualityCtl() {
 
 function switchSpeed(speed, cb_done) {}
 
+function getVideoPlayer() {
+    let video = document.querySelector(".video-stream") || document.querySelector("..html5-main-video") || document.querySelector("video")
+    return video
+}
+
 let currentSpeed = '1.0'
 function speedCtl(nextHandler) {
     let speedMenu = findSettingsMenuItem(PLAYBACK_SPEED_LABELS)
@@ -317,7 +322,9 @@ function speedCtl(nextHandler) {
         console.log(switchedInfo)
         success = true
     } else {
-        console.log(`${LOG_PREFIX}Playback speed ${currentSpeed} not found`)
+        console.log(`${LOG_PREFIX}Playback speed ${currentSpeed} not found, adjust directly`)
+        let video = getVideoPlayer()
+        video.playbackRate = currentSpeed
     }
 
     setTimeout(() => {
@@ -329,11 +336,6 @@ function speedCtl(nextHandler) {
 }
 
 function hookResetSpeed() {
-    function getVideoPlayer() {
-        let video = document.querySelector(".video-stream") || document.querySelector("..html5-main-video") || document.querySelector("video")
-        return video
-    }
-
     document.addEventListener("keydown", (event) => {
         if (event.key == '|') {
             console.log(`${LOG_PREFIX}Reset playback speed`)

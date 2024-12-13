@@ -69,6 +69,9 @@ function setupQualityList() {
 
 function setupPlaybackSpeedList() {
     let speedList = document.querySelector(".speed-list")
+    let speedCustom = speedList.querySelector('#speed-custom')
+    let customSpeedInput = speedList.querySelector('#custom-speed')
+
     for (let q of allPossiblePlaybackSpeed) {
         let itemWrapper = document.createElement("div")
 
@@ -97,6 +100,29 @@ function setupPlaybackSpeedList() {
         itemWrapper.append(item)
         itemWrapper.append(label)
         speedList.append(itemWrapper)
+    }
+
+    function updateCustomSpeed() {
+        let customSpeed = customSpeedInput.value
+        try {
+            customSpeed = parseFloat(customSpeed.toString())
+        } catch (error) {
+            customSpeed = "3.0"
+        }
+        storage.set({playbackSpeed: customSpeed}, function () {
+            console.log(`Default playback speed now changed to ${customSpeed}.`)
+        })
+    }
+    speedCustom.addEventListener('change', () => {
+        updateCustomSpeed()
+    })
+    customSpeedInput.addEventListener('keyup', () => {
+        updateCustomSpeed()
+        speedCustom.click()
+    })
+    if (!allPossiblePlaybackSpeed.includes(options['currentSpeed'])) {
+        speedCustom.checked = true
+        customSpeedInput.value = options['currentSpeed']
     }
 }
 
