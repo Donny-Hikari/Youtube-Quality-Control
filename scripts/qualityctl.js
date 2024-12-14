@@ -341,6 +341,11 @@ function hookResetSpeed() {
             console.log(`${LOG_PREFIX}Reset playback speed`)
             currentSpeed = '1.0'
             speedCtl(() => {})
+        } else if (event.key == '\\') {
+            let video = getVideoPlayer()
+
+            hijackBubble(String(video.playbackRate) + 'x')
+            console.log(`${LOG_PREFIX}Playback speed is ${video.playbackRate}` + 'x')
         } else if (event.key == '.') {
             let video = getVideoPlayer()
 
