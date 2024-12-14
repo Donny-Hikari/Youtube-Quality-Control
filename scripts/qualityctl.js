@@ -19,12 +19,15 @@ let previousTimeoutHandler = null
 function hijackBubble(msg, timeout=3000) {
     try {
         let bezelText = $(".ytp-bezel-text-wrapper .ytp-bezel-text")
+        let container = bezelText.parentElement.parentElement
         if (bezelText != null) {
             bezelText.innerText = msg
-            bezelText.parentElement.parentElement.style.display = 'block'
+            container.style.display = 'block'
+            container.classList.remove('ytp-bezel-text-hide')
             clearTimeout(previousTimeoutHandler)
             previousTimeoutHandler = setTimeout(() => {
-                bezelText.parentElement.parentElement.style.display = 'none'
+                container.style.display = 'none'
+                container.classList.add('ytp-bezel-text-hide')
             }, timeout)
         }
     } catch (e) {}
