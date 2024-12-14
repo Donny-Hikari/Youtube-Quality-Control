@@ -104,14 +104,19 @@ function setupPlaybackSpeedList() {
 
     function updateCustomSpeed() {
         let customSpeed = customSpeedInput.value
-        try {
-            customSpeed = parseFloat(customSpeed.toString())
-        } catch (error) {
-            customSpeed = "3.0"
+        customSpeed = parseFloat(customSpeed.toString())
+        if (isNaN(customSpeed) || customSpeed <= 0) {
+            customSpeedInput.classList.add('invalid')
+        } else {
+            if (String(customSpeed) != customSpeedInput.value) {
+                customSpeedInput.classList.add('invalid')
+            } else {
+                customSpeedInput.classList.remove('invalid')
+            }
+            storage.set({playbackSpeed: customSpeed}, function () {
+                console.log(`Default playback speed now changed to ${customSpeed}.`)
+            })
         }
-        storage.set({playbackSpeed: customSpeed}, function () {
-            console.log(`Default playback speed now changed to ${customSpeed}.`)
-        })
     }
     speedCustom.addEventListener('change', () => {
         updateCustomSpeed()

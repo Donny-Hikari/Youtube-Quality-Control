@@ -51,8 +51,12 @@ h1 {
     display: flex;
 }
 #custom-speed {
-    margin: auto 5px auto 20px;
+    margin: auto auto auto 20px;
     max-width: 60px;
+    padding: 0 5px;
+}
+#custom-speed.invalid {
+    color: red;
 }
 @media (prefers-color-scheme: dark) {
     body {
