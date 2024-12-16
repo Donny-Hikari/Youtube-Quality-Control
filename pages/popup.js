@@ -7,7 +7,7 @@
 const allPossibleQualities = ["best", "4320p", "2160p", "1440p", "1080p", "720p", "480p", "360p", "240p", "144p"]
 const allPossiblePlaybackSpeed = ['0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75', '2']
 
-const storage = chrome.storage.sync
+const storage = (typeof chrome == "undefined" || chrome?.storage?.sync == undefined) ? { get: (a, f) => f({}) } : chrome.storage.sync
 
 let options = {
     'currentQuality': 'best',
