@@ -326,9 +326,10 @@ function speedCtl(nextHandler) {
         success = true
     } else {
         console.log(`${LOG_PREFIX}Playback speed ${currentSpeed} not found, adjust directly`)
-        let video = getVideoPlayer()
-        video.playbackRate = currentSpeed
     }
+    // In case our infinite speed tricked Youtube
+    let video = getVideoPlayer()
+    video.playbackRate = currentSpeed
 
     setTimeout(() => {
         goBackSettingsMenu()
@@ -338,7 +339,7 @@ function speedCtl(nextHandler) {
     return success
 }
 
-function hookResetSpeed() {
+function hookHotkey() {
     document.addEventListener("keydown", (event) => {
         if (event.key == '|') {
             console.log(`${LOG_PREFIX}Reset playback speed`)
@@ -375,6 +376,11 @@ function hookResetSpeed() {
 
             event.stopPropagation()
             event.preventDefault()
+        } else if (event.key == '~') {
+            // hide the video ui elements
+            for (let elem of document.querySelectorAll(".ytp-chrome-top, .ytp-gradient-top, .ytp-chrome-bottom, .ytp-gradient-bottom, .ytp-bezel, .ytp-bezel-text-wrapper")) {
+                elem.style.display = "none";
+            }
         }
     })
 }
@@ -390,7 +396,7 @@ function addressChange(cb) {
 }
 
 function mainCtl() {
-    hookResetSpeed()
+    hookHotkey()
     qualityCtl()
     setInterval(() => addressChange(qualityCtl), 1000)
 
